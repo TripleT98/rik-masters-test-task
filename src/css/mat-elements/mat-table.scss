@@ -1,0 +1,15 @@
+@import './../variables.scss';
+
+.mat-mdc-header-row, .mdc-data-table__header-row, .cdk-header-row{
+  text-align: center !important;
+  background-color: $main-red !important;
+  color: white !important;
+}
+
+.mat-mdc-cell, .mdc-data-table__cell, .cdk-cell{
+  text-align: center !important;
+}
+
+.mat-mdc-header-cell, .mdc-data-table__header-cell, .cdk-header-cell{
+  text-align: center !important;
+}
