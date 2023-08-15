@@ -19,13 +19,19 @@
     "target": "ES2022",
     "module": "ES2022",
     "useDefineForClassFields": false,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
     "lib": [
       "ES2022",
       "dom"
     ],
     "paths": {
       "@shared/*": ["app/shared/*"],
-      "@accountList/*": ["app/modules/account-list/*"]
+      "@accountList/*": ["app/modules/account-list/*"],
+      "@store/*": ["app/store/*"],
+      "@service/*": ["app/service/*"],
+      "@type/*": ["app/types/*"],
+      "@pipe/*": ["app/pipe/*"]
     }
   },
   "angularCompilerOptions": {
