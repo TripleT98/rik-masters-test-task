@@ -1,3 +1,130 @@
-<div class="">
-  <button mat-raised-button>aaa</button>
+<div class="account-list">
+
+  <ng-container [ngTemplateOutlet]="tableBody"></ng-container>
 </div>
+
+<ng-template #title>
+  <div class="title">
+    <span>{{title}}</span>
+  </div>
+</ng-template>
+
+
+<ng-template #tableBody>
+  <table mat-table [dataSource]="(users$ | async) || []" class="mat-elevation-z8 mat-table">
+
+    <!--- Note that these columns can be defined in any order.
+          The actual rendered columns are set as a property on the row definition" -->
+
+    <!-- Position Column -->
+    <ng-container matColumnDef="Действия">
+      <th mat-header-cell *matHeaderCellDef> Действия </th>
+      <td mat-cell *matCellDef="let element">
+        <ng-container [ngTemplateOutlet]="actionCell">
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <!-- Name Column -->
+    <ng-container matColumnDef="Логин">
+      <th mat-header-cell *matHeaderCellDef> Логин </th>
+      <td mat-cell *matCellDef="let element">
+        <ng-container [ngTemplateOutlet]="textCell" [ngTemplateOutletContext]="{text: element.name}">
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <!-- Weight Column -->
+    <ng-container matColumnDef="E-mail">
+      <th mat-header-cell *matHeaderCellDef> E-mail </th>
+      <td mat-cell *matCellDef="let element">
+        <ng-container [ngTemplateOutlet]="textCell" [ngTemplateOutletContext]="{text: element.email}">
+        </ng-container>
+      </td>>
+    </ng-container>
+
+    <!-- Symbol Column -->
+    <ng-container matColumnDef="Телефон">
+      <th mat-header-cell *matHeaderCellDef> Телефон </th>
+      <td mat-cell *matCellDef="let element">
+        <ng-container [ngTemplateOutlet]="phoneCell" [ngTemplateOutletContext]="{phone: element.phone}">
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Роли">
+      <th mat-header-cell *matHeaderCellDef> Роли </th>
+      <td mat-cell *matCellDef="let element">
+        <ng-container [ngTemplateOutlet]="roleCell" [ngTemplateOutletContext]="{userId: element.id}">
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Дата изменения">
+      <th mat-header-cell *matHeaderCellDef> Дата изменения </th>
+      <td mat-cell *matCellDef="let element">
+        <ng-container [ngTemplateOutlet]="dateCell" [ngTemplateOutletContext]="{date: element.update_at}">
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Дата создания">
+      <th mat-header-cell *matHeaderCellDef> Дата создания </th>
+      <td mat-cell *matCellDef="let element">
+        <ng-container [ngTemplateOutlet]="dateCell" [ngTemplateOutletContext]="{date: element.create_at}">
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Статус">
+      <th mat-header-cell *matHeaderCellDef> Дата статус </th>
+      <td mat-cell *matCellDef="let element">
+        <ng-container [ngTemplateOutlet]="statusCell" [ngTemplateOutletContext]="{userId: element.id}">
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Наличие ЭП">
+      <th mat-header-cell *matHeaderCellDef> Наличие ЭП </th>
+      <td mat-cell *matCellDef="let element">
+        <ng-container [ngTemplateOutlet]="ecpCell" [ngTemplateOutletContext]="{userId: element.id}">
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+  </table>
+</ng-template>
+
+<ng-template #actionCell>
+  <mat-icon>more_horiz</mat-icon>
+</ng-template>
+
+<ng-template #textCell let-text="text">
+  <span>{{text}}</span>
+</ng-template>
+
+<ng-template #phoneCell let-phone="phone">
+  <span>{{phone | phone}}</span>
+</ng-template>
+
+<ng-template #statusCell let-userId="userId">
+  <span *ngIf="(userId | userData | async) as userData" [ngClass]="{active: userData?.status === statuses[0], blocked:userData?.status === statuses[1]}">{{userData?.status}}</span>
+</ng-template>
+
+  <ng-template #roleCell let-userId="userId">
+    <span *ngIf="(userId | userData | async) as userData">{{userData?.is_admin ? "Администратор" : "Пользователь"}}</span>
+  </ng-template>
+
+  <ng-template #dateCell let-date="date">
+    <span>{{date | date : 'dd.mm.yyyy'}}</span>
+  </ng-template>
+
+  <ng-template #ecpCell let-userId="userId">
+    <mat-icon *ngIf="(userId | userData | async) as userData" [ngClass]="{'no-ecp': !userData?.is_ecp}" class="ecp-icon">{{userData?.is_ecp ? "check" : "close"}}</mat-icon>
+  </ng-template>
+
+  <ng-template #fallBack>
+
+  </ng-template>

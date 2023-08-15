@@ -1,1 +1,28 @@
-<app-account-list></app-account-list>
+<div class="app-container">
+  <div class="header-container">
+    <ng-container [ngTemplateOutlet]="header">{{version}}</ng-container>
+  </div>
+  <div class="main-container">
+    <ng-container [ngTemplateOutlet]="navBar"></ng-container>
+    <ng-container [ngTemplateOutlet]="main"></ng-container>
+  </div>
+</div>
+
+
+<ng-template #header>
+  <div class="header">
+
+  </div>
+</ng-template>
+
+<ng-template #navBar>
+  <div class="nav-bar">
+
+  </div>
+</ng-template>
+
+<ng-template #main>
+  <div class="main">
+    <app-account-list></app-account-list>
+  </div>
+</ng-template>

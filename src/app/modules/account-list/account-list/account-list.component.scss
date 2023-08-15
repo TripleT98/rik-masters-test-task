@@ -1,0 +1,27 @@
+@import './../../../../css/variables.scss';
+
+.account-list{
+  padding: 20px;
+}
+
+.mat-table{
+  box-shadow: 1px 1px 5px grey;
+}
+
+.ecp-icon{
+  color: white;
+  border-radius: 50%;
+  box-sizing: content-box;
+  padding: 3px;
+  background-color: $active;
+  &.no-ecp{
+    background-color: $blocked;
+  }
+}
+
+.active{
+  color: $active;
+}
+.blocked{
+  color: $blocked;
+}
