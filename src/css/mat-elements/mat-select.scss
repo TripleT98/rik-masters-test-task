@@ -1,0 +1,44 @@
+@import './../variables.scss';
+
+$form-field-border-radius: 15px;
+$form-field-height: 44px;
+
+.mdc-text-field--outlined{
+  height: $form-field-height !important;
+}
+
+.mdc-notched-outline__leading {
+  border-top-left-radius: $form-field-border-radius !important;
+  border-bottom-left-radius: $form-field-border-radius !important;
+}
+
+.mdc-notched-outline__trailing {
+  border-top-right-radius: $form-field-border-radius !important;
+  border-bottom-right-radius: $form-field-border-radius !important;
+}
+
+.mat-mdc-input-element, .mat-mdc-select-value{
+  width: 95% !important;
+  transform: translateY(-7px);
+  font-size: 14px !important;
+  font-weight: 400 !important;
+}
+
+.mat-mdc-option, .mat-mdc-select-min-line{
+  font-size: 14px !important;
+  font-weight: 400 !important;
+}
+
+
+.mat-mdc-form-field-icon-suffix{
+  position: relative !important;
+  top: calc($form-field-height/2);
+  transform: translate(-25%, -136%);
+}
+
+.filter-date-picker{
+  .mat-mdc-form-field-icon-suffix{
+    top: 0;
+    transform: translate(0,-10%);
+  }
+}

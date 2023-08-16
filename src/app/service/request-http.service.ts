@@ -7,14 +7,16 @@ export class RequestHttpService<T extends Record<string, any>>{
 
   constructor(
     protected store: EntityStore<T>,
-    protected path: string,
     protected httpS: HttpService,
+    protected path?: string,
   ){
     this.initial();
   }
 
   initial(){
-    this.httpS.get$<T[]>(this.path).subscribe(data=>this.store.set(data))
+    if(this.path){
+      this.httpS.get$<T[]>(this.path).subscribe(data=>this.set(data))
+    }
   }
 
   getItems(){
@@ -31,6 +33,14 @@ export class RequestHttpService<T extends Record<string, any>>{
 
   getID$(id: Id){
     return this.store.getID$(id)
+  }
+
+  set(items:T[]){
+    this.store.set(items);
+  }
+
+  add(item: T){
+    this.store.upsert(item);
   }
 
 }

@@ -10,7 +10,7 @@ export class UserDataService extends RequestHttpService<UserData>{
   constructor(
     store: UserDataStore
   ){
-    super(store, 'http://cars.cprogroup.ru/api/rubetek/angular-testcase-list/', inject(HttpService));
+    super(store, inject(HttpService), 'http://cars.cprogroup.ru/api/rubetek/angular-testcase-list/');
   }
 
 }

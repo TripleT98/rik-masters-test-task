@@ -1,1 +1,78 @@
-<p>filter works!</p>
+<div class="user-form">
+  <ng-container [ngTemplateOutlet]="header"></ng-container>
+  <ng-container [ngTemplateOutlet]="formBar"></ng-container>
+  <ng-container [ngTemplateOutlet]="buttonBar"></ng-container>
+</div>
+
+<ng-template #header>
+  <div class="header">
+    <span>Фильтр</span>
+  </div>
+</ng-template>
+
+<ng-template #formBar>
+  <div class="form-bar">
+    <div *ngFor="let formData of formArray" class="form-field">
+      <ng-container [ngSwitch]="formData.input.type">
+        <ng-container *ngSwitchCase="'text'" [ngTemplateOutlet]="textInput" [ngTemplateOutletContext]="{control:formData.control, label:formData.name}"></ng-container>
+        <ng-container *ngSwitchCase="'select'" [ngTemplateOutlet]="selectInput" [ngTemplateOutletContext]="{control:formData.control, options: formData.input.options | async, label:formData.name}"></ng-container>
+        <ng-container *ngSwitchCase="'phone'" [ngTemplateOutlet]="phoneInput" [ngTemplateOutletContext]="{control:formData.control, label:formData.name}"></ng-container>
+        <ng-container *ngSwitchCase="'date'" [ngTemplateOutlet]="dateInput" [ngTemplateOutletContext]="{control:formData.control, label:formData.name}"></ng-container>
+      </ng-container>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #buttonBar>
+  <div class="button-bar">
+    <ng-container *ngFor="let abutton of actionButtons" [ngTemplateOutlet]="actionButton" [ngTemplateOutletContext]="{text: abutton.name}"></ng-container>
+  </div>
+</ng-template>
+
+<ng-template #actionButton let-text="text">
+  <button mat-raised-button type="button" class="action-button">{{text}}</button>
+</ng-template>
+
+
+<ng-template #textInput let-control="control" let-label="label">
+  <div class="label">
+    {{label}}
+  </div>
+  <mat-form-field appearance="outline">
+    <input matInput [formControl]="control" type="text">
+    <mat-icon matSuffix class="close-button">close</mat-icon>
+  </mat-form-field>
+</ng-template>
+
+<ng-template #phoneInput let-control="control" let-label="label">
+  <div class="label">
+    {{label}}
+  </div>
+  <mat-form-field appearance="outline">
+    <input matInput [formControl]="control" [mask]="'+0(000)-000-00-00'">
+  </mat-form-field>
+</ng-template>
+
+<ng-template #dateInput let-control="control" let-label="label">
+  <div class="label">
+    {{label}}
+  </div>
+  <mat-form-field appearance="outline" class="filter-date-picker">
+    <input matInput [formControl]="control" [matDatepicker]="picker" type="text">
+    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+  </mat-form-field>
+</ng-template>
+
+<ng-template #selectInput let-control="control" let-options="options" let-label="label">
+  <div class="label">
+    {{label}}
+  </div>
+  <mat-form-field appearance="outline">
+    <mat-select [formControl]="control" type="text">
+      <mat-option *ngFor="let item of options" [value]="item.id">
+        {{item.name}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</ng-template>

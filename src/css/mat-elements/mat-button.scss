@@ -1,5 +1,11 @@
 @import './../variables.scss';
 
 .mat-mdc-raised-button{
+  color: white !important;
+  font-size: 14px !important;
+  font-weight: 300 !important;
   background-color: $main-red !important;
+  padding: 10px 28px !important;
+  height: 48px !important;
+  border-radius: 8px !important;
 }

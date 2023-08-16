@@ -4,6 +4,10 @@ import { MatButtonModule } from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 const modules = [
   MatButtonModule,
@@ -11,6 +15,10 @@ const modules = [
   MatIconModule,
   FormsModule,
   ReactiveFormsModule,
+  MatSelectModule,
+  MatInputModule,
+  MatDatepickerModule,
+  MatNativeDateModule
 ]
 
 @NgModule({

@@ -1,9 +1,10 @@
 <div class="account-list">
-
+  <ng-container [ngTemplateOutlet]="titleTemp"></ng-container>
+  <app-filter (filterChange)="filter($event)"></app-filter>
   <ng-container [ngTemplateOutlet]="tableBody"></ng-container>
 </div>
 
-<ng-template #title>
+<ng-template #titleTemp>
   <div class="title">
     <span>{{title}}</span>
   </div>
@@ -13,10 +14,6 @@
 <ng-template #tableBody>
   <table mat-table [dataSource]="(users$ | async) || []" class="mat-elevation-z8 mat-table">
 
-    <!--- Note that these columns can be defined in any order.
-          The actual rendered columns are set as a property on the row definition" -->
-
-    <!-- Position Column -->
     <ng-container matColumnDef="Действия">
       <th mat-header-cell *matHeaderCellDef> Действия </th>
       <td mat-cell *matCellDef="let element">
@@ -25,7 +22,6 @@
       </td>
     </ng-container>
 
-    <!-- Name Column -->
     <ng-container matColumnDef="Логин">
       <th mat-header-cell *matHeaderCellDef> Логин </th>
       <td mat-cell *matCellDef="let element">
@@ -34,7 +30,6 @@
       </td>
     </ng-container>
 
-    <!-- Weight Column -->
     <ng-container matColumnDef="E-mail">
       <th mat-header-cell *matHeaderCellDef> E-mail </th>
       <td mat-cell *matCellDef="let element">
@@ -43,7 +38,6 @@
       </td>>
     </ng-container>
 
-    <!-- Symbol Column -->
     <ng-container matColumnDef="Телефон">
       <th mat-header-cell *matHeaderCellDef> Телефон </th>
       <td mat-cell *matCellDef="let element">

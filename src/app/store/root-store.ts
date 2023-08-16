@@ -1,9 +1,9 @@
-import { Subject, Observable } from 'rxjs';
+import { Subject, Observable, BehaviorSubject } from 'rxjs';
 import { pairwise, filter, map } from 'rxjs/operators'
 
 abstract class RootState<T>{
 
-  readonly stateObserver$ = new Subject<T>();
+  readonly stateObserver$ = new BehaviorSubject<T>(undefined as T);
 
   protected value:T;
 
@@ -36,6 +36,7 @@ abstract class RootState<T>{
   }
 
   protected emit(){
+    if(!this.value){return}
     this.stateObserver$.next(this.value);
   }
 

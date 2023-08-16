@@ -3,7 +3,7 @@ import { UserData } from './user-data.model';
 import { EntityStore, EntityState } from "@store/root-store";
 import { MainResponse } from "@type/response.type";
 
-const storeName = "User"
+const storeName = "UserData"
 
 export class UserDataState extends EntityState<UserData>{
 

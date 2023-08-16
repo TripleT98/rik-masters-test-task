@@ -1,0 +1,66 @@
+@import './../../../../css/variables.scss';
+
+:host{
+  .form-field{
+    margin-left: 0 !important;
+    margin-right: 28px !important;
+  }
+  .mat-mdc-form-field{
+    width: 266px !important;
+  }
+}
+
+.form-bar{
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 34px;
+  .form-field{
+    margin: 0 10px;
+    font-size: 14px;
+    mat-form-field{
+      margin-top: 10px;
+    }
+    .label{
+      font-weight: 700;
+    }
+  }
+}
+
+.user-form{
+  padding: 34px 34px;
+  box-shadow: 1px 1px 5px grey;
+}
+
+.close-button{
+  color: white;
+  border-radius: 50%;
+  box-sizing: content-box;
+  background-color: $blocked;
+  cursor: pointer;
+  &:hover{
+  }
+}
+
+.button-bar{
+  margin-top: 20px;
+  .action-button{
+    margin-right: 30px;
+  }
+}
+
+.disabled-icon{
+  background-color: $main-grey;
+  cursor: default;
+}
+
+.material-icons{
+  font-size: 16px !important;
+}
+.mat-icon{
+  height: 20px;
+  width: 20px;
+  padding: 0px !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
