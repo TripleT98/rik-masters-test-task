@@ -1,15 +1,16 @@
-import { Component, OnInit, EventEmitter, Output, Inject } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output, Inject, Input } from '@angular/core';
 import { UserService } from '@store/user/user.service';
 import { User } from '@store/user/user.model';
 import { UserDataService } from '@store/user-data/user-data.service';
 import { UserData } from '@store/user-data/user-data.model';
 import { StatusService } from '@store/status/status.service';
 import { RoleService } from '@store/role/role.service';
-import { FormGroup, AbstractControl, FormControl } from '@angular/forms';
+import { FormGroup, AbstractControl, FormControl, ValidatorFn, Validators } from '@angular/forms';
 import { FormControlService, FormList, FormType, WithControlForm } from '@service/form-control.service';
 import { DestroyService } from '@service/destroy.service';
-import { Observable, combineLatest, take, takeUntil } from 'rxjs';
-import { FILTER_NAME_TOKEN } from './../account-list.module';
+import { Button, ButtonName } from '@type/buttons.types';
+import { Observable, BehaviorSubject, combineLatest, take, takeUntil, map, startWith } from 'rxjs';
+import { FILTER_NAME_TOKEN, USER_ADD_TOKEN, filterName, userAdd } from './../account-list.module';
 
 @Component({
   selector: 'app-filter',
@@ -19,9 +20,19 @@ import { FILTER_NAME_TOKEN } from './../account-list.module';
 })
 export class FilterComponent implements OnInit {
 
-  @Output()filterChange = new EventEmitter();
+  protected _formType!:string;
+  @Input() set formType(formType: string){
+    this._formType = formType;
+    if(formType === userAdd){
+      this.deleteFormFields(['create_at', 'update_at']);
+      this.setInitialValidators();
+    };
+  }
 
-  protected formArray: WithControlForm[] = [];
+  @Output() filterChange = new EventEmitter();
+
+  protected readonly maxDate = new Date();
+  protected formArray!: WithControlForm[];
   protected filterFormGroup!: FormGroup;
   protected formList: FormList = [
     {
@@ -58,6 +69,7 @@ export class FilterComponent implements OnInit {
       name: 'E-mail',
       input: {
         type: 'text',
+        validators: [Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]
       }
     },
     {
@@ -76,10 +88,16 @@ export class FilterComponent implements OnInit {
       }
     }
   ];
+  private filterSnapshoot: string = '';
+
+  protected filterStatus$ = new BehaviorSubject<'on' | 'off'>('off');
+  protected disableSaveButton$!: Observable<boolean>;
+  protected disableCancleButton$!: Observable<boolean>;
+  protected disableResetButton$!: Observable<boolean>;
   protected readonly actionButtons: Button[] = [
     {
       name: ButtonName.submit,
-      action: this.submit.bind(this)
+      action: this.submit.bind(this),
     },
     {
       name: ButtonName.cancle,
@@ -98,7 +116,8 @@ export class FilterComponent implements OnInit {
     private destroyS: DestroyService,
     private statusS: StatusService,
     private roleS: RoleService,
-    @Inject(FILTER_NAME_TOKEN) private readonly formName: string
+    @Inject(FILTER_NAME_TOKEN) protected readonly formName: string,
+    @Inject(USER_ADD_TOKEN) protected readonly userAddFormName: string
   ){
   }
 
@@ -109,42 +128,82 @@ export class FilterComponent implements OnInit {
   private initForm(){
     this.formArray = this.getFormSet();
     this.filterFormGroup = this.getFormGroup();
-    this.filterFormGroup.valueChanges.pipe(takeUntil(this.destroyS.destroy$)).subscribe(filterData=>{
-      this.filterChange.emit(filterData);
-    });
+    this.disableSaveButton$ = combineLatest(this.filterFormGroup.valueChanges.pipe(startWith(null)), this.filterStatus$).pipe(
+      map(([_, filterStatus])=>{
+        const isEmpty: boolean = this.controlS.isFormEmpty(this._formType);
+        const isInvalid: boolean = this.filterFormGroup.status === "INVALID";
+        const isFilterChanged: boolean = !this.controlS.compareFormValues(this.filterSnapshoot, this.controlS.getFormSnapshot(this._formType));
+        return isEmpty || isInvalid || (filterStatus === 'on' && !isFilterChanged);
+      })
+    );
+    this.disableCancleButton$ = this.filterFormGroup.valueChanges.pipe(
+      startWith(null),
+      map(val=>{
+        const isEmpty: boolean = this.controlS.isFormEmpty(this._formType);
+        return isEmpty;
+      })
+    );
+    this.disableResetButton$ = combineLatest(this.filterFormGroup.valueChanges.pipe(startWith(null)), this.filterStatus$).pipe(
+      map(([val, filterStatus])=>{
+        const isEmpty: boolean = this.controlS.isFormEmpty(this._formType);
+        return isEmpty && filterStatus === 'off';
+      })
+    );
+    this.setButtonDisablers();
+    this.setFormSnapshoot();
+  }
+
+  private deleteFormFields(filelds: string[]){
+    this.formList = this.formList.filter(formData=>!filelds.includes(formData.prop));
+  }
+
+  private setFormSnapshoot(){
+    this.filterSnapshoot = this.controlS.getFormSnapshot(this._formType);
+  }
+
+  private setButtonDisablers(){
+    this.actionButtons.forEach(button=>{
+      switch(button.name){
+        case ButtonName.submit: button.disableAsync$ = this.disableSaveButton$;break;
+        case ButtonName.cancle: button.disableAsync$ = this.disableCancleButton$;break;
+        case ButtonName.reset: button.disableAsync$ = this.disableResetButton$;break;
+      }
+    })
   }
 
   private getFormSet(){
-    return this.controlS.createControlGroup(this.formName, this.formList);
+    return this.controlS.createControlGroup(this._formType, this.formList);
   }
 
   private getFormGroup(){
-    return this.controlS.getGroup(this.formName);
+    return this.controlS.getGroup(this._formType);
   }
 
   private submit(){
-
+    this.filterChange.emit(this.filterFormGroup.value);
+    this.setFormSnapshoot();
+    this.filterStatus$.next('on');
   }
   private cancle(){
-
+    this.filterFormGroup.reset();
   }
   private reset(){
+    this.filterFormGroup.reset();
+    this.submit();
+    this.filterStatus$.next('off');
+  }
 
+  //вызывать только до инициализации формы
+  private setInitialValidators(){
+    const initialValidators: ValidatorFn[] = [Validators.required];
+    this.formList.forEach(formData=>{
+      let curValidrs = formData.input.validators || [];
+      formData.input.validators = [...curValidrs,...initialValidators];
+    })
   }
 
 }
 
 export type FilterFormsType = {
   [key in keyof (User & UserData)]: (User & UserData)[key];
-}
-
-type Button = {
-  name: ButtonName,
-  action: Function,
-}
-
-enum ButtonName {
-  submit = "Применить",
-  cancle = "Отмена",
-  reset = "Сбросить"
 }

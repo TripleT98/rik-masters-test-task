@@ -39,8 +39,8 @@ export class RequestHttpService<T extends Record<string, any>>{
     this.store.set(items);
   }
 
-  add(item: T){
-    this.store.upsert(item);
+  add(item: T): T{
+    return this.store.upsert(item);
   }
 
 }

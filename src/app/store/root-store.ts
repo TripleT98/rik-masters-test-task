@@ -1,5 +1,5 @@
 import { Subject, Observable, BehaviorSubject } from 'rxjs';
-import { pairwise, filter, map } from 'rxjs/operators'
+import { pairwise, filter, map, distinctUntilChanged, startWith, tap } from 'rxjs/operators'
 
 abstract class RootState<T>{
 
@@ -37,7 +37,7 @@ abstract class RootState<T>{
 
   protected emit(){
     if(!this.value){return}
-    this.stateObserver$.next(this.value);
+    this.stateObserver$.next(JSON.parse(JSON.stringify(this.value)));
   }
 
 }
@@ -65,7 +65,7 @@ abstract class State<T> extends RootState<T>{
 export abstract class EntityState<T extends Record<string, any>> extends RootState<T[]>{
 
 
-  public readonly upsertObserver$ = new Subject<Id>();
+  public readonly upsertObserver$ = new BehaviorSubject<Id | null>(null);
 
   public readonly idKey: Id;
 
@@ -88,16 +88,27 @@ export abstract class EntityState<T extends Record<string, any>> extends RootSta
     return !!deletedItem;
   }
 
-  public upsert(entity: T){
+  public upsert(entity: T): T{
     const id = entity[this.idKey];
-    const currentEntity = this.getItem(id);
+    let currentEntity = this.getItem(id);
     if(currentEntity){
       this.value[this.value.indexOf(currentEntity)] = {...currentEntity, ...entity};
     }else{
-      this.value.push(entity);
+      let newId!:number;
+      if(!id){newId = this.getNumberOriginId();}
+      currentEntity = {...entity, [this.idKey]:id || newId}
+      this.value.push(currentEntity);
     }
     this.emitUpsert(id);
     this.emit();
+    return currentEntity;
+  }
+
+  private getNumberOriginId():number{
+    const existingIds =  this.get().map(ent=>ent[this.idKey]);
+    let newId!:number;
+    const maxId = Math.max(...existingIds);
+    return maxId ? maxId+1 : 1;
   }
 
   protected emitUpsert(id: Id){
@@ -105,10 +116,13 @@ export abstract class EntityState<T extends Record<string, any>> extends RootSta
   }
 
   public getID$(id: Id): Observable<T | undefined>{
-    return this.upsertObserver$.pipe(
-      filter(changinItemId=>changinItemId === id),
-      map(changinItemId=>this.getItem(changinItemId)),
-      filter(item=>!!item)
+    return this.stateObserver$.pipe(
+      map((items=>items?.find(item=>item[this.idKey] === id))),
+      startWith(null as unknown as T),
+      pairwise(),
+      distinctUntilChanged((prev,curr)=>JSON.stringify(prev) === JSON.stringify(curr)),
+      filter(item=>!!item),
+      map(([_, curr])=>curr)
     );
   }
 
@@ -134,8 +148,8 @@ export abstract class EntityStore<D extends Record<string,any>>{
     this.idKey = state.idKey;
   }
 
-  public upsert(item: D){
-     this.state.upsert(item);
+  public upsert(item: D): D{
+     return this.state.upsert(item);
   }
 
   public set(stateValue: D[]){

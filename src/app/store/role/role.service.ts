@@ -25,7 +25,7 @@ export class RoleService extends RequestHttpService<Role>{
     this.set(this.createRoles());
   }
 
-  private createRoles(){
+  createRoles(){
     return this.roles.map(role=>new Role(role));
   }
 

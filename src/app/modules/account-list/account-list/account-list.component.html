@@ -1,6 +1,8 @@
 <div class="account-list">
   <ng-container [ngTemplateOutlet]="titleTemp"></ng-container>
-  <app-filter (filterChange)="filter($event)"></app-filter>
+  <ng-container [ngTemplateOutlet]="buttonBar"></ng-container>
+  <app-filter [hidden]="!showFilter" (filterChange)="filter($event)" [formType]="formName"></app-filter>
+  <app-filter [hidden]="!showAddPanel" (filterChange)="addUser($event)" [formType]="userAddFormName"></app-filter>
   <ng-container [ngTemplateOutlet]="tableBody"></ng-container>
 </div>
 
@@ -12,83 +14,87 @@
 
 
 <ng-template #tableBody>
-  <table mat-table [dataSource]="(users$ | async) || []" class="mat-elevation-z8 mat-table">
+  <div class="table-container">
+    <table mat-table [dataSource]="(users$ | async) || []" class="mat-elevation-z8 mat-table">
 
-    <ng-container matColumnDef="Действия">
-      <th mat-header-cell *matHeaderCellDef> Действия </th>
-      <td mat-cell *matCellDef="let element">
-        <ng-container [ngTemplateOutlet]="actionCell">
-        </ng-container>
-      </td>
-    </ng-container>
+      <ng-container matColumnDef="Action">
+        <th mat-header-cell *matHeaderCellDef> Действия </th>
+        <td mat-cell *matCellDef="let element">
+          <ng-container [ngTemplateOutlet]="actionCell">
+          </ng-container>
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="Логин">
-      <th mat-header-cell *matHeaderCellDef> Логин </th>
-      <td mat-cell *matCellDef="let element">
-        <ng-container [ngTemplateOutlet]="textCell" [ngTemplateOutletContext]="{text: element.name}">
-        </ng-container>
-      </td>
-    </ng-container>
+      <ng-container matColumnDef="Login">
+        <th mat-header-cell class="login-cell" *matHeaderCellDef><mat-checkbox [(ngModel)]="selectAll" (ngModelChange)="selectAllUsers()" color="warn">Логин</mat-checkbox></th>
+        <td mat-cell *matCellDef="let element" class="login-cell">
+          <mat-checkbox color="warn" [(ngModel)]="selectedUsers[element.id]">
+            <ng-container [ngTemplateOutlet]="textCell" [ngTemplateOutletContext]="{text: element.name}"></ng-container>
+          </mat-checkbox>
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="E-mail">
-      <th mat-header-cell *matHeaderCellDef> E-mail </th>
-      <td mat-cell *matCellDef="let element">
-        <ng-container [ngTemplateOutlet]="textCell" [ngTemplateOutletContext]="{text: element.email}">
-        </ng-container>
-      </td>>
-    </ng-container>
+      <ng-container matColumnDef="EMail">
+        <th mat-header-cell *matHeaderCellDef> E-mail </th>
+        <td mat-cell *matCellDef="let element">
+          <ng-container [ngTemplateOutlet]="textCell" [ngTemplateOutletContext]="{text: element.email}">
+          </ng-container>
+        </td>>
+      </ng-container>
 
-    <ng-container matColumnDef="Телефон">
-      <th mat-header-cell *matHeaderCellDef> Телефон </th>
-      <td mat-cell *matCellDef="let element">
-        <ng-container [ngTemplateOutlet]="phoneCell" [ngTemplateOutletContext]="{phone: element.phone}">
-        </ng-container>
-      </td>
-    </ng-container>
+      <ng-container matColumnDef="Phone">
+        <th mat-header-cell *matHeaderCellDef> Телефон </th>
+        <td mat-cell *matCellDef="let element">
+          <ng-container [ngTemplateOutlet]="phoneCell" [ngTemplateOutletContext]="{phone: element.phone}">
+          </ng-container>
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="Роли">
-      <th mat-header-cell *matHeaderCellDef> Роли </th>
-      <td mat-cell *matCellDef="let element">
-        <ng-container [ngTemplateOutlet]="roleCell" [ngTemplateOutletContext]="{userId: element.id}">
-        </ng-container>
-      </td>
-    </ng-container>
+      <ng-container matColumnDef="Role">
+        <th mat-header-cell *matHeaderCellDef> Роли </th>
+        <td mat-cell *matCellDef="let element">
+          <ng-container [ngTemplateOutlet]="roleCell" [ngTemplateOutletContext]="{userId: element.id}">
+          </ng-container>
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="Дата изменения">
-      <th mat-header-cell *matHeaderCellDef> Дата изменения </th>
-      <td mat-cell *matCellDef="let element">
-        <ng-container [ngTemplateOutlet]="dateCell" [ngTemplateOutletContext]="{date: element.update_at}">
-        </ng-container>
-      </td>
-    </ng-container>
+      <ng-container matColumnDef="DateChange">
+        <th mat-header-cell *matHeaderCellDef> Дата изменения </th>
+        <td mat-cell *matCellDef="let element">
+          <ng-container [ngTemplateOutlet]="dateCell" [ngTemplateOutletContext]="{date: element.update_at}">
+          </ng-container>
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="Дата создания">
-      <th mat-header-cell *matHeaderCellDef> Дата создания </th>
-      <td mat-cell *matCellDef="let element">
-        <ng-container [ngTemplateOutlet]="dateCell" [ngTemplateOutletContext]="{date: element.create_at}">
-        </ng-container>
-      </td>
-    </ng-container>
+      <ng-container matColumnDef="DateCreation">
+        <th mat-header-cell *matHeaderCellDef> Дата создания </th>
+        <td mat-cell *matCellDef="let element">
+          <ng-container [ngTemplateOutlet]="dateCell" [ngTemplateOutletContext]="{date: element.create_at}">
+          </ng-container>
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="Статус">
-      <th mat-header-cell *matHeaderCellDef> Дата статус </th>
-      <td mat-cell *matCellDef="let element">
-        <ng-container [ngTemplateOutlet]="statusCell" [ngTemplateOutletContext]="{userId: element.id}">
-        </ng-container>
-      </td>
-    </ng-container>
+      <ng-container matColumnDef="Status">
+        <th mat-header-cell *matHeaderCellDef> Статус </th>
+        <td mat-cell *matCellDef="let element">
+          <ng-container [ngTemplateOutlet]="statusCell" [ngTemplateOutletContext]="{userId: element.id}">
+          </ng-container>
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="Наличие ЭП">
-      <th mat-header-cell *matHeaderCellDef> Наличие ЭП </th>
-      <td mat-cell *matCellDef="let element">
-        <ng-container [ngTemplateOutlet]="ecpCell" [ngTemplateOutletContext]="{userId: element.id}">
-        </ng-container>
-      </td>
-    </ng-container>
+      <ng-container matColumnDef="ECP">
+        <th mat-header-cell *matHeaderCellDef> Наличие ЭП </th>
+        <td mat-cell *matCellDef="let element">
+          <ng-container [ngTemplateOutlet]="ecpCell" [ngTemplateOutletContext]="{userId: element.id}">
+          </ng-container>
+        </td>
+      </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="columns"></tr>
-    <tr mat-row *matRowDef="let row; columns: columns;"></tr>
-  </table>
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+    </table>
+    <ng-container [ngTemplateOutlet]="tableFooter"></ng-container>
+  </div>
 </ng-template>
 
 <ng-template #actionCell>
@@ -96,28 +102,69 @@
 </ng-template>
 
 <ng-template #textCell let-text="text">
-  <span>{{text}}</span>
+  <span [matTooltip]="text">{{text}}</span>
 </ng-template>
 
 <ng-template #phoneCell let-phone="phone">
-  <span>{{phone | phone}}</span>
+  <span [matTooltip]="phone | phone">{{phone | phone}}</span>
 </ng-template>
 
 <ng-template #statusCell let-userId="userId">
-  <span *ngIf="(userId | userData | async) as userData" [ngClass]="{active: userData?.status === statuses[0], blocked:userData?.status === statuses[1]}">{{userData?.status}}</span>
+  <span *ngIf="(userId | userData | async) as userData" [ngClass]="{active: userData?.status === statuses[0], blocked:userData?.status === statuses[1]}"  [matTooltip]="userData?.status || ''">{{userData?.status}}</span>
 </ng-template>
 
   <ng-template #roleCell let-userId="userId">
-    <span *ngIf="(userId | userData | async) as userData">{{userData?.is_admin ? "Администратор" : "Пользователь"}}</span>
+    <span *ngIf="(userId | userData | async) as userData" [matTooltip]="userData?.is_admin ? 'Администратор' : 'Пользователь'" >{{userData?.is_admin ? "Администратор" : "Пользователь"}}</span>
   </ng-template>
 
   <ng-template #dateCell let-date="date">
-    <span>{{date | date : 'dd.mm.yyyy'}}</span>
+    <span [matTooltip]="(date | date : 'dd.MM.yyyy') || ''">{{date | date : 'dd.MM.yyyy'}}</span>
   </ng-template>
 
   <ng-template #ecpCell let-userId="userId">
     <mat-icon *ngIf="(userId | userData | async) as userData" [ngClass]="{'no-ecp': !userData?.is_ecp}" class="ecp-icon">{{userData?.is_ecp ? "check" : "close"}}</mat-icon>
   </ng-template>
+
+  <ng-template #buttonBar>
+    <div class="main-bar">
+      <div class="button-bar">
+        <ng-container *ngFor="let abutton of (actionButtons.slice(0, actionButtons.length - 1))" [ngTemplateOutlet]="actionButton" [ngTemplateOutletContext]="{text: abutton.name, action: abutton.action, icon:abutton.icon}"></ng-container>
+      </div>
+      <div class="button-bar filter-button-container">
+        <ng-container [ngTemplateOutlet]="actionButton" [ngTemplateOutletContext]="{text: actionButtons[3].name, action: actionButtons[3].action, icon: actionButtons[3].icon}"></ng-container>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #actionButton let-text="text" let-action="action" let-icon="icon">
+    <button mat-raised-button type="button" class="action-button" (click)="action()">{{text}}<mat-icon>{{icon}}</mat-icon></button>
+  </ng-template>
+
+  <ng-template #tableFooter>
+    <div class="table-footer">
+      <div class="select-count footer-block">
+        <span class="table-footer-text">Отображать</span>
+        <mat-form-field appearance="outline">
+          <mat-select [ngModel]="usersOnPage" (ngModelChange)="emitCount($event)" type="text">
+            <mat-option *ngFor="let item of [4,6,8]" [value]="item">
+              {{item}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="page=bar footer-block">
+        <button type="button" name="button" mat-icon-button (click)="emitPage(-1)"><mat-icon>keyboard_arrow_left</mat-icon></button>
+        <button type="button" name="button" mat-icon-button (click)="emitPage(1)"><mat-icon>keyboard_arrow_right</mat-icon></button>
+      </div>
+      <div class="view-range footer-block" *ngIf="(pageNSlice$ | async) as range">
+        <span class="table-footer-text">{{range[0]}}-{{range[1]}} из {{(userS.get$() | async)?.length}}</span>
+      </div>
+      <div class="selected-count footer-block">
+        <span class="table-footer-text">Количество выбранных записей - {{getSelectedLength()}}</span>
+      </div>
+    </div>
+  </ng-template>
+
 
   <ng-template #fallBack>
 

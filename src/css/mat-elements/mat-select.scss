@@ -39,6 +39,41 @@ $form-field-height: 44px;
 .filter-date-picker{
   .mat-mdc-form-field-icon-suffix{
     top: 0;
-    transform: translate(0,-10%);
+    transform: translate(0,-2%);
+  }
+}
+
+$select-count-height: 24px;
+
+app-account-list{
+  .mat-mdc-select-arrow-wrapper{
+    transform: translate(-8px, -7px);
+  }
+  .filter-date-picker{
+    .mat-mdc-form-field-icon-suffix{
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      transform: translate(-8px,-6px);
+    }
+  }
+  .table-footer{
+    .mat-mdc-form-field{
+      height: $select-count-height;
+      width: 68px;
+    }
+    .mat-mdc-text-field-wrapper{
+      height: $select-count-height !important;
+    }
+    .mat-mdc-form-field-infix{
+      padding: 0 !important;
+      height: 100%;
+    }
+    .mat-mdc-select-value{
+      transform: translate(-2px, -2px);
+    }
+    .mat-mdc-select-arrow-wrapper{
+      transform: translate(-2px, -2px);
+    }
   }
 }

@@ -6,8 +6,11 @@ import { PipesModule } from '@pipe/pipe.module';
 import { FilterComponent } from './filter/filter.component';
 import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 
-const filterName = 'userFilter';
+export const filterName = 'userFilter';
 export const FILTER_NAME_TOKEN = new InjectionToken<string>(filterName);
+console.log(FILTER_NAME_TOKEN)
+export const userAdd = 'userAdd';
+export const USER_ADD_TOKEN = new InjectionToken<string>(userAdd);
 
 @NgModule({
   declarations: [
@@ -26,7 +29,8 @@ export const FILTER_NAME_TOKEN = new InjectionToken<string>(filterName);
   ],
   providers: [
     provideNgxMask(),
-    { provide: FILTER_NAME_TOKEN, useValue: filterName }
+    { provide: FILTER_NAME_TOKEN, useValue: filterName },
+    { provide: USER_ADD_TOKEN, useValue: userAdd },
   ]
 })
 export class AccountListModule { }

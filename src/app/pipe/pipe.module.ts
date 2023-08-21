@@ -1,10 +1,14 @@
 import { NgModule } from '@angular/core';
 import { PhonePipe } from './phone.pipe';
 import { UserDataPipe } from './user-status.pipe';
+import { FormErrorPipe } from './form-error.pipe';
+import { IsNullablePipe } from './check-nullable-value.pipe';
 
 const pipes = [
   PhonePipe,
-  UserDataPipe
+  UserDataPipe,
+  FormErrorPipe,
+  IsNullablePipe
 ]
 
 @NgModule({

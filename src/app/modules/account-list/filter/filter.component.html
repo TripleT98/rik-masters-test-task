@@ -6,7 +6,7 @@
 
 <ng-template #header>
   <div class="header">
-    <span>Фильтр</span>
+    <span>{{_formType === formName ? 'Фильтр' : 'Добавить'}}</span>
   </div>
 </ng-template>
 
@@ -25,12 +25,12 @@
 
 <ng-template #buttonBar>
   <div class="button-bar">
-    <ng-container *ngFor="let abutton of actionButtons" [ngTemplateOutlet]="actionButton" [ngTemplateOutletContext]="{text: abutton.name}"></ng-container>
+    <ng-container *ngFor="let abutton of actionButtons" [ngTemplateOutlet]="actionButton" [ngTemplateOutletContext]="{text: abutton.name, action: abutton.action, disableAsync$: abutton.disableAsync$}"></ng-container>
   </div>
 </ng-template>
 
-<ng-template #actionButton let-text="text">
-  <button mat-raised-button type="button" class="action-button">{{text}}</button>
+<ng-template #actionButton let-text="text" let-action="action" let-disableAsync$="disableAsync$">
+  <button mat-raised-button type="button" class="action-button" (click)="action()" [disabled]="disableAsync$ ? (disableAsync$ | async) : false">{{text}}</button>
 </ng-template>
 
 
@@ -40,7 +40,8 @@
   </div>
   <mat-form-field appearance="outline">
     <input matInput [formControl]="control" type="text">
-    <mat-icon matSuffix class="close-button">close</mat-icon>
+    <mat-icon matSuffix class="close-button" (click)="control.reset()" [ngClass]="{disabled: control.valueChanges | async | isNullable}">close</mat-icon>
+    <mat-error>{{control | formError | async}}</mat-error>
   </mat-form-field>
 </ng-template>
 
@@ -50,6 +51,8 @@
   </div>
   <mat-form-field appearance="outline">
     <input matInput [formControl]="control" [mask]="'+0(000)-000-00-00'">
+    <mat-icon matSuffix class="close-button" (click)="control.reset()" [ngClass]="{disabled: control.valueChanges | async| isNullable}">close</mat-icon>
+    <mat-error>{{control | formError | async}}</mat-error>
   </mat-form-field>
 </ng-template>
 
@@ -58,9 +61,11 @@
     {{label}}
   </div>
   <mat-form-field appearance="outline" class="filter-date-picker">
-    <input matInput [formControl]="control" [matDatepicker]="picker" type="text">
+    <input matInput [formControl]="control" [matDatepicker]="picker" type="text" [readonly]="true">
     <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-    <mat-datepicker #picker></mat-datepicker>
+    <mat-datepicker #picker disabled="false"></mat-datepicker>
+    <mat-icon matSuffix class="close-button" (click)="control.reset()" [ngClass]="{disabled:control.valueChanges | async | isNullable}">close</mat-icon>
+    <mat-error>{{control | formError | async}}</mat-error>
   </mat-form-field>
 </ng-template>
 
@@ -74,5 +79,7 @@
         {{item.name}}
       </mat-option>
     </mat-select>
+    <mat-icon matSuffix class="close-button" (click)="$event.stopPropagation();control.reset()" [ngClass]="{disabled: control.valueChanges | async | isNullable}">close</mat-icon>
+    <mat-error>{{control | formError | async}}</mat-error>
   </mat-form-field>
 </ng-template>

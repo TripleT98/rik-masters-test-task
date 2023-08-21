@@ -20,7 +20,7 @@ export class UserDataPipe implements PipeTransform {
 
   transform(userId:Id): Observable<UserData | undefined>{
     return this.userDataS.getID$(userId).pipe(map(userData=>{
-      return userData ? {...userData, status: userData.status === Status["ACTIVE"] ? Status["ACTIVE"] : Status['BLOCKED']} : userData;
+      return userData ? {...userData, status: userData.status === Status["Активен"] ? Status["ACTIVE"] : Status['BLOCKED']} : userData;
     }));
   }
 

@@ -7,5 +7,11 @@ export type UserData = {
 
 export enum Status {
   ACTIVE = "Активен",
-  BLOCKED = "Заблокирован"
+  BLOCKED = "Заблокирован",
+  "Активен" = "ACTIVE",
+  "Заблокирован" = "BLOCKED",
+}
+
+export function getStatus(statusId: number): Status {
+  return statusId === 1 ? Status["Активен"] : Status["Заблокирован"];
 }

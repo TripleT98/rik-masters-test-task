@@ -35,5 +35,17 @@ $nav-bar-width: 272px;
   }
   .main{
     flex-grow: 1;
+    max-width: calc(100% - $nav-bar-width);
+    max-height: 100%;
+    overflow: auto;
+  }
+}
+
+@media (max-width: 1024px) {
+  .nav-bar{
+    width: 0px !important;
+  }
+  .main{
+    max-width: 100% !important;
   }
 }

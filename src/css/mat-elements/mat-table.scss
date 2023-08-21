@@ -14,3 +14,35 @@
 .mat-mdc-header-cell, .mdc-data-table__header-cell, .cdk-header-cell{
   text-align: center !important;
 }
+
+.login-cell.mat-mdc-cell, .login-cell.mdc-data-table__cell, .login-cell.cdk-cell, .login-cell.mat-mdc-header-cell{
+  text-align: left !important;
+}
+
+.mdc-data-table__cell, .mdc-data-table__header-cell {
+    padding: 0 4px 0 4px !important;
+}
+
+@mixin littleFont {
+  .mat-table{
+    .mat-mdc-header-cell, .mdc-data-table__header-cell, .cdk-header-cell, .mdc-data-table__cell{
+      font-size: .8em !important;
+    }
+  }
+}
+
+@media (max-width: 1140px) {
+  @include littleFont;
+}
+
+@media (max-width: 1024px) {
+  .mat-table{
+    .mat-mdc-header-cell, .mdc-data-table__header-cell, .cdk-header-cell, .mdc-data-table__cell{
+      font-size: 1em !important;
+    }
+  }
+}
+
+@media (max-width: 880px) {
+  @include littleFont;
+}
