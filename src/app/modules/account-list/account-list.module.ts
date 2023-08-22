@@ -8,7 +8,6 @@ import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 
 export const filterName = 'userFilter';
 export const FILTER_NAME_TOKEN = new InjectionToken<string>(filterName);
-console.log(FILTER_NAME_TOKEN)
 export const userAdd = 'userAdd';
 export const USER_ADD_TOKEN = new InjectionToken<string>(userAdd);
 

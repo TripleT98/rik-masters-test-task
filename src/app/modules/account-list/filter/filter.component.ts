@@ -134,20 +134,23 @@ export class FilterComponent implements OnInit {
         const isInvalid: boolean = this.filterFormGroup.status === "INVALID";
         const isFilterChanged: boolean = !this.controlS.compareFormValues(this.filterSnapshoot, this.controlS.getFormSnapshot(this._formType));
         return isEmpty || isInvalid || (filterStatus === 'on' && !isFilterChanged);
-      })
+      }),
+      takeUntil(this.destroyS.destroy$)
     );
     this.disableCancleButton$ = this.filterFormGroup.valueChanges.pipe(
       startWith(null),
       map(val=>{
         const isEmpty: boolean = this.controlS.isFormEmpty(this._formType);
         return isEmpty;
-      })
+      }),
+      takeUntil(this.destroyS.destroy$)
     );
     this.disableResetButton$ = combineLatest(this.filterFormGroup.valueChanges.pipe(startWith(null)), this.filterStatus$).pipe(
       map(([val, filterStatus])=>{
         const isEmpty: boolean = this.controlS.isFormEmpty(this._formType);
         return isEmpty && filterStatus === 'off';
-      })
+      }),
+      takeUntil(this.destroyS.destroy$)
     );
     this.setButtonDisablers();
     this.setFormSnapshoot();

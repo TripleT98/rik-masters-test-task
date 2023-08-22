@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, ChangeDetectorRef } from '@angular/core';
 import { UserService } from '@store/user/user.service';
 import { UserDataService } from '@store/user-data/user-data.service';
 import { Status } from '@store/user-data/user-data.model';
@@ -8,6 +8,7 @@ import { FilterFormsType } from '@accountList/filter/filter.component';
 import { AccountsFilterService } from '@accountList/filter/filter.service';
 import { FormControlService, FormList, FormType, WithControlForm } from '@service/form-control.service';
 import { ResizeObserverService } from '@service/resize-observer.service';
+import { DestroyService } from '@service/destroy.service';
 import { Button, ButtonName } from '@type/buttons.types';
 import { Observable, Subject, BehaviorSubject, combineLatest, takeUntil, startWith, map } from 'rxjs';
 import { FILTER_NAME_TOKEN, USER_ADD_TOKEN } from './../account-list.module';
@@ -15,21 +16,24 @@ import { FILTER_NAME_TOKEN, USER_ADD_TOKEN } from './../account-list.module';
 @Component({
   selector: 'app-account-list',
   templateUrl: './account-list.component.html',
-  styleUrls: ['./account-list.component.scss']
+  styleUrls: ['./account-list.component.scss'],
+  providers: [DestroyService]
 })
 export class AccountListComponent implements OnInit {
 
+  protected object = Object;
   protected usersOnPage: number = 4;
   protected readonly sliceUserList$ = new BehaviorSubject<number>(this.usersOnPage);
   protected curPage: number = 1;
   protected readonly page$ = new BehaviorSubject<number>(this.curPage);
   protected readonly pageNSlice$: Observable<[number,number]> = combineLatest(this.page$, this.sliceUserList$, this.userS.get$()).pipe(
+    takeUntil(this.destroyS.destroy$),
     map(([page, count, users])=>{
       const usersLength = users?.length;
       const start = this._getStart(page, count) + 1;
       const end = start + count - 1;
       return [start >= usersLength ? usersLength : start, end-1 > usersLength ? usersLength : end];
-    })
+    }),
   )
   protected showFilter: boolean = true;
   protected showAddPanel: boolean = false;
@@ -41,11 +45,14 @@ export class AccountListComponent implements OnInit {
     this.filterTrigger$.pipe(startWith(this.filterForm.value)),
     this.sliceUserList$,
     this.page$
-  ).pipe(map(([users, filterValue, count, page])=>{
-    const filteredUsers = this._filter(users, filterValue);
-    const slicedUsers = this.usePageNSlice(page, count, filteredUsers);
-    return slicedUsers;
-  }));
+  ).pipe(
+    map(([users, filterValue, count, page])=>{
+      const filteredUsers = this._filter(users, filterValue);
+      const slicedUsers = this.usePageNSlice(page, count, filteredUsers);
+      return slicedUsers;
+    }),
+    takeUntil(this.destroyS.destroy$)
+  );
   protected selectAll:boolean = false;
   protected selectedUsers: Record<number, boolean> = {};
   protected readonly columns = ["Action", "Login", "EMail", "Phone", "Role", "DateChange", "DateCreation", "Status", "ECP"] as const;
@@ -78,6 +85,7 @@ export class AccountListComponent implements OnInit {
   protected readonly resizeObserver!: ResizeObserver;
   //Ширин body при которой таблица замещается карточками
   private readonly tableToCardsWidth = 768;
+  protected displayedContent: 'table' | 'cards' = 'table';
 
   constructor(
     protected userS: UserService,
@@ -85,13 +93,27 @@ export class AccountListComponent implements OnInit {
     private controlS: FormControlService,
     private filterS: AccountsFilterService,
     private resizeS: ResizeObserverService,
+    private destroyS: DestroyService,
+    private cdr: ChangeDetectorRef,
     @Inject(FILTER_NAME_TOKEN) protected readonly formName: string,
     @Inject(USER_ADD_TOKEN) protected readonly userAddFormName: string
   ){
-    this.resizeObserver = this.resizeS.createObserver(document.getElementsByTagName('body')[0], (entries)=>{console.log(entries)});
+    this.resizeObserver = this.resizeS.createObserver(document.getElementsByTagName('body')[0], this.resizeSubscriber.bind(this));
   }
 
   ngOnInit(){
+  }
+
+  public resizeSubscriber(obsElems: ResizeObserverEntry[]){
+    const bodyWidth = obsElems[0].borderBoxSize[0].inlineSize;
+    if(bodyWidth <= this.tableToCardsWidth){
+      console.log(bodyWidth,'cards', this.tableToCardsWidth)
+      this.displayedContent = 'cards';
+    }else{
+      console.log(bodyWidth,'table', this.tableToCardsWidth)
+      this.displayedContent = 'table';
+    }
+    this.cdr.detectChanges();
   }
 
   protected filter(filterData:Partial<FilterFormsType>){
@@ -203,6 +225,5 @@ export class AccountListComponent implements OnInit {
     this.selectAll = false;
     this.selectedUsers = {};
   }
-
 
 }

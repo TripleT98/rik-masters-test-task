@@ -10,6 +10,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
 
 const modules = [
   MatButtonModule,
@@ -22,7 +23,8 @@ const modules = [
   MatDatepickerModule,
   MatNativeDateModule,
   MatCheckboxModule,
-  MatTooltipModule
+  MatTooltipModule,
+  MatDividerModule,
 ]
 
 @NgModule({

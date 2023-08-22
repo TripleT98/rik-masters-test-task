@@ -3,7 +3,8 @@
   <ng-container [ngTemplateOutlet]="buttonBar"></ng-container>
   <app-filter [hidden]="!showFilter" (filterChange)="filter($event)" [formType]="formName"></app-filter>
   <app-filter [hidden]="!showAddPanel" (filterChange)="addUser($event)" [formType]="userAddFormName"></app-filter>
-  <ng-container [ngTemplateOutlet]="tableBody"></ng-container>
+  <ng-container *ngIf="displayedContent === 'table'" [ngTemplateOutlet]="tableBody"></ng-container>
+  <ng-container *ngIf="displayedContent === 'cards'"[ngTemplateOutlet]="userCards"></ng-container>
 </div>
 
 <ng-template #titleTemp>
@@ -161,6 +162,44 @@
       </div>
       <div class="selected-count footer-block">
         <span class="table-footer-text">Количество выбранных записей - {{getSelectedLength()}}</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #userCards>
+    <div class="table-container">
+      <ng-container *ngFor="let user of (users$ | async)" [ngTemplateOutlet]="userCard" [ngTemplateOutletContext]="{user}"></ng-container>
+      <ng-container [ngTemplateOutlet]="tableFooter"></ng-container>
+    </div>
+  </ng-template>
+
+
+  <ng-template #userCard let-user="user">
+    <div class="user-card">
+      <div class="left col">
+        <ng-container [ngTemplateOutlet]="userCardRow" [ngTemplateOutletContext]="{name: 'Действия', templateName: actionCell}"></ng-container>
+        <ng-container [ngTemplateOutlet]="userCardRow" [ngTemplateOutletContext]="{name: 'E-Mail', templateName: textCell, contentData: {text:user.email}}"></ng-container>
+        <ng-container [ngTemplateOutlet]="userCardRow" [ngTemplateOutletContext]="{name: 'Роли', templateName: roleCell, contentData: {userId:user.id}}"></ng-container>
+        <ng-container [ngTemplateOutlet]="userCardRow" [ngTemplateOutletContext]="{name: 'Дата создания', templateName: dateCell, contentData: {date:user.create_at}}"></ng-container>
+        <ng-container [ngTemplateOutlet]="userCardRow" [ngTemplateOutletContext]="{name: 'Наличие ЭП', templateName: ecpCell, contentData: {userId:user.id}}"></ng-container>
+      </div>
+      <div class="right col">
+        <ng-container [ngTemplateOutlet]="userCardRow" [ngTemplateOutletContext]="{name: 'Логин', templateName: textCell, contentData: {text:user.name}}"></ng-container>
+        <ng-container [ngTemplateOutlet]="userCardRow" [ngTemplateOutletContext]="{name: 'Телефон', templateName: phoneCell, contentData: {phone:user.phone}}"></ng-container>
+        <ng-container [ngTemplateOutlet]="userCardRow" [ngTemplateOutletContext]="{name: 'Дата изменения', templateName: dateCell, contentData: {date:user.update_at}}"></ng-container>
+        <ng-container [ngTemplateOutlet]="userCardRow" [ngTemplateOutletContext]="{name: 'Статус', templateName: statusCell, contentData: {userId:user.id}}"></ng-container>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- tcn - template content data - данные для шаблока -->
+  <ng-template #userCardRow let-name="name" let-templateName="templateName" let-contentData="contentData">
+    <div class="user-card-row">
+      <div class="user-card-row-text">
+        <span>{{name}}</span>
+      </div>
+      <div class="user-card-row-content">
+        <ng-container [ngTemplateOutlet]="templateName" [ngTemplateOutletContext]="contentData"></ng-container>
       </div>
     </div>
   </ng-template>
