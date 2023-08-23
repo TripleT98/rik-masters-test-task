@@ -24,7 +24,6 @@ export class FormErrorPipe implements PipeTransform {
         if(errorText){continue};
         errorText = this.getErrorText(errKey);
       }
-      console.log(errorText);
       return errorText;
     }))
   }

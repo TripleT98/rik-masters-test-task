@@ -9,8 +9,9 @@ import { AccountsFilterService } from '@accountList/filter/filter.service';
 import { FormControlService, FormList, FormType, WithControlForm } from '@service/form-control.service';
 import { ResizeObserverService } from '@service/resize-observer.service';
 import { DestroyService } from '@service/destroy.service';
+import { GetPropType } from '@accountList/filter/filter.service';
 import { Button, ButtonName } from '@type/buttons.types';
-import { Observable, Subject, BehaviorSubject, combineLatest, takeUntil, startWith, map } from 'rxjs';
+import { Observable, Subject, BehaviorSubject, combineLatest, takeUntil, startWith, map, take, tap } from 'rxjs';
 import { FILTER_NAME_TOKEN, USER_ADD_TOKEN } from './../account-list.module';
 
 @Component({
@@ -26,7 +27,32 @@ export class AccountListComponent implements OnInit {
   protected readonly sliceUserList$ = new BehaviorSubject<number>(this.usersOnPage);
   protected curPage: number = 1;
   protected readonly page$ = new BehaviorSubject<number>(this.curPage);
-  protected readonly pageNSlice$: Observable<[number,number]> = combineLatest(this.page$, this.sliceUserList$, this.userS.get$()).pipe(
+  protected showFilter: boolean = true;
+  protected showAddPanel: boolean = false;
+  private readonly filterTrigger$ = new Subject<Partial<FilterFormsType>>();
+  protected readonly sortParams = ["Логин","EMail","Дата изменения", "Дата создания", "Сбросить"] as const;
+  protected currentSortParam: typeof this.sortParams[number] | '' = '';
+  private readonly sortEmitter$ = new BehaviorSubject<keyof User | null>(null);
+  protected filterForm: FormGroup = this.controlS.getGroup(this.formName);
+  protected userAddForm: FormGroup = this.controlS.getGroup(this.userAddFormName);
+  protected filteredUsers$ = new BehaviorSubject<User[]>([]);
+  protected users$: Observable<User[]> = combineLatest(
+    this.userS.get$(),
+    this.filterTrigger$.pipe(startWith(this.filterForm.value), map(_=>this.filterForm.value)),
+    this.sliceUserList$,
+    this.page$,
+    this.sortEmitter$,
+  ).pipe(
+    map(([users, filterValue, count, page, sortParam])=>{
+      const filteredUsers = this._filter(users, filterValue);
+      this.filteredUsers$.next(filteredUsers);
+      const sortedUsers = sortParam ? this.sortUsers(filteredUsers, sortParam) : filteredUsers;
+      const slicedUsers = this.usePageNSlice(page, count, sortedUsers);
+      return slicedUsers;
+    }),
+    takeUntil(this.destroyS.destroy$)
+  );
+  protected readonly pageNSlice$: Observable<[number,number]> = combineLatest(this.page$, this.sliceUserList$, this.filteredUsers$).pipe(
     takeUntil(this.destroyS.destroy$),
     map(([page, count, users])=>{
       const usersLength = users?.length;
@@ -35,24 +61,6 @@ export class AccountListComponent implements OnInit {
       return [start >= usersLength ? usersLength : start, end-1 > usersLength ? usersLength : end];
     }),
   )
-  protected showFilter: boolean = true;
-  protected showAddPanel: boolean = false;
-  private readonly filterTrigger$ = new Subject<Partial<FilterFormsType>>();
-  protected filterForm: FormGroup = this.controlS.getGroup(this.formName);
-  protected userAddForm: FormGroup = this.controlS.getGroup(this.userAddFormName);
-  protected users$: Observable<User[]> = combineLatest(
-    this.userS.get$(),
-    this.filterTrigger$.pipe(startWith(this.filterForm.value)),
-    this.sliceUserList$,
-    this.page$
-  ).pipe(
-    map(([users, filterValue, count, page])=>{
-      const filteredUsers = this._filter(users, filterValue);
-      const slicedUsers = this.usePageNSlice(page, count, filteredUsers);
-      return slicedUsers;
-    }),
-    takeUntil(this.destroyS.destroy$)
-  );
   protected selectAll:boolean = false;
   protected selectedUsers: Record<number, boolean> = {};
   protected readonly columns = ["Action", "Login", "EMail", "Phone", "Role", "DateChange", "DateCreation", "Status", "ECP"] as const;
@@ -107,17 +115,14 @@ export class AccountListComponent implements OnInit {
   public resizeSubscriber(obsElems: ResizeObserverEntry[]){
     const bodyWidth = obsElems[0].borderBoxSize[0].inlineSize;
     if(bodyWidth <= this.tableToCardsWidth){
-      console.log(bodyWidth,'cards', this.tableToCardsWidth)
       this.displayedContent = 'cards';
     }else{
-      console.log(bodyWidth,'table', this.tableToCardsWidth)
       this.displayedContent = 'table';
     }
     this.cdr.detectChanges();
   }
 
   protected filter(filterData:Partial<FilterFormsType>){
-    console.log(filterData)
     this.filterTrigger$.next(filterData);
   }
 
@@ -127,13 +132,36 @@ export class AccountListComponent implements OnInit {
   }
 
   protected emitPage(dir: -1 | 1){
-    const currPage = this.page$.value;
-    const currCount = this.sliceUserList$.value;
-    const newpage = currPage + dir;
-    const start = this._getStart(newpage, currCount)
-    const userListlength = this.userS.getItems().length;
-    if(newpage < 1 || start >= userListlength){return};
-    this.page$.next(newpage);
+    this.filteredUsers$.pipe(take(1)).subscribe(users=>{
+      const currPage = this.page$.value;
+      const currCount = this.sliceUserList$.value;
+      const newpage = currPage + dir;
+      const start = this._getStart(newpage, currCount)
+      const userListlength = users.length;
+      if(newpage < 1 || start >= userListlength){return};
+      this.page$.next(newpage);
+    })
+  }
+
+  protected emitSort(sortParam: typeof this.sortParams[number]){
+    let userSortingProp: keyof User | null = null;
+    switch(sortParam){
+      case "Логин": userSortingProp = 'name';break;
+      case "EMail": userSortingProp = 'email';break;
+      case "Дата изменения": userSortingProp = 'update_at';break;
+      case "Дата создания": userSortingProp = 'create_at';break;
+    }
+    this.sortEmitter$.next(userSortingProp);
+  }
+
+  private sortUsers(users: User[], sortParam: keyof User){
+    const sortedUsers = [...users];
+    return sortedUsers.sort((u1,u2)=>{
+      const u1Prop = u1[sortParam];
+      const u2Prop = u2[sortParam];
+      if(u1Prop === u2Prop){return 0}
+      return u1Prop > u2Prop ? 1 : -1;
+    })
   }
 
   private usePageNSlice(page: number, count:number, collection: any[]): any[]{
@@ -181,9 +209,9 @@ export class AccountListComponent implements OnInit {
       const idAsNumber = Number(userId);
       const isSelected = this.selectedUsers[idAsNumber];
       if(isSelected){
-        this.userDataS.blockUser(idAsNumber)
+        this.userS.blockUser(idAsNumber)
       }else{
-        this.userDataS.unblockUser(idAsNumber)
+        this.userS.unblockUser(idAsNumber)
       }
     }
     this._clearSelection()
@@ -193,9 +221,9 @@ export class AccountListComponent implements OnInit {
       const idAsNumber = Number(userId);
       const isSelected = this.selectedUsers[idAsNumber];
       if(isSelected){
-        this.userDataS.unblockUser(idAsNumber)
+        this.userS.unblockUser(idAsNumber)
       }else{
-        this.userDataS.blockUser(idAsNumber)
+        this.userS.blockUser(idAsNumber)
       }
     }
     this._clearSelection()
@@ -205,11 +233,12 @@ export class AccountListComponent implements OnInit {
     this.showFilter = !this.showFilter;
   }
   protected selectAllUsers(){
-    const users = this.userS.getItems().map(user=>user.id);
-    users.forEach(userId=>{
-      const idAsNumber = Number(userId);
-      this.selectedUsers[idAsNumber] = this.selectAll;
-    })
+    this.filteredUsers$.pipe(take(1)).subscribe(users=>{
+      users.forEach(user=>{
+        const idAsNumber = Number(user.id);
+        this.selectedUsers[idAsNumber] = this.selectAll;
+      })
+    });
   }
   protected getSelectedLength(){
     let counts = 0;
@@ -220,7 +249,6 @@ export class AccountListComponent implements OnInit {
     }
     return counts;
   }
-
   private _clearSelection(){
     this.selectAll = false;
     this.selectedUsers = {};

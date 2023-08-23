@@ -88,6 +88,6 @@ type FilterToPropType = {
   }
 }
 
-type GetPropType<T, D> = {
+export type GetPropType<T, D> = {
   [key in keyof T as T[key] extends D ? key : never]: D;
 }

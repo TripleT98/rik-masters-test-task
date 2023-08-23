@@ -99,4 +99,21 @@ export class UserService extends RequestHttpService<User>{
     }
   }
 
+  public blockUser(userId:number){
+    this.userDataS.blockUser(userId);
+    this.changeUserUpdateDate(userId);
+  }
+
+  public unblockUser(userId:number){
+    this.userDataS.unblockUser(userId);
+    this.changeUserUpdateDate(userId);
+  }
+
+  private changeUserUpdateDate(userId: number){
+    const user = this.getID(userId);
+    if(!user){return};
+    const newUser = {...user, update_at: new Date()}
+    this.add(newUser)
+  }
+
 }

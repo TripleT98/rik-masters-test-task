@@ -8,7 +8,7 @@ import { HttpService } from "@service/http.service";
 export class UserDataService extends RequestHttpService<UserData>{
 
   constructor(
-    store: UserDataStore
+    store: UserDataStore,
   ){
     super(store, inject(HttpService), 'http://cars.cprogroup.ru/api/rubetek/angular-testcase-list/');
   }

@@ -1,8 +1,8 @@
 <div class="app-container">
   <div class="header-container">
-    <ng-container [ngTemplateOutlet]="header">{{version}}</ng-container>
+    <ng-container [ngTemplateOutlet]="header"></ng-container>
   </div>
-  <div class="main-container">
+  <div class="main-container" [ngClass]="{'opened-menu': menuStatus, 'closed-menu': !menuStatus}">
     <ng-container [ngTemplateOutlet]="navBar"></ng-container>
     <ng-container [ngTemplateOutlet]="main"></ng-container>
   </div>
@@ -11,18 +11,51 @@
 
 <ng-template #header>
   <div class="header">
-
+    <div class=" rightElem">
+      <button *ngIf="openMenuButtonStatus; else profileInfo" mat-icon-button type="button" name="button" class="burger-button" (click)="openMenu()"><mat-icon>list</mat-icon></button>
+    </div>
   </div>
 </ng-template>
 
 <ng-template #navBar>
   <div class="nav-bar">
-
+    <div *ngIf="openMenuButtonStatus">
+      <ng-container [ngTemplateOutlet]="profileInfo"></ng-container>
+      <mat-divider [style.marginBottom]="'20px'"></mat-divider>
+    </div>
+    <div class="title">
+      <h3>Суперагент</h3>
+      <p>Банк ВТБ(ПАО)</p>
+    </div>
+    <mat-divider></mat-divider>
+    <div class="control">
+      <h4><mat-icon>business_center</mat-icon>Управление</h4>
+      <p>Карточка контрагента</p>
+      <p>Договоры контрагента</p>
+    </div>
+    <div class="sub">
+      <h4><mat-icon>people</mat-icon>Субагенты</h4>
+    </div>
+    <div class="version">
+      v{{version}}
+    </div>
   </div>
 </ng-template>
 
 <ng-template #main>
   <div class="main">
     <app-account-list></app-account-list>
+  </div>
+</ng-template>
+
+<ng-template #profileInfo>
+  <div class="profileInfo">
+    <div class="profileInfo-icon">
+      <mat-icon>person</mat-icon>
+    </div>
+    <div class="profileInfo-description" *ngIf="(user$ | async) as user">
+      <p>{{user.name}}</p>
+      <p>{{user.status}}</p>
+    </div>
   </div>
 </ng-template>

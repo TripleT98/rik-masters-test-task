@@ -93,10 +93,24 @@
   }
 }
 
-@media (max-width: 1230px) {
+@media (max-width: 620px) {
+  .button-bar{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .action-button{
+    width: 50%;
+    margin-right: 0px !important;
+    min-width: 200px;
+    &:not(:first-child){
+      margin-top: 20px;
+    }
+  }
   :host{
     .form-field{
-      width: 50% !important;
+      width: 100% !important;
     }
   }
 }

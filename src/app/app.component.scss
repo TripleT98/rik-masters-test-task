@@ -1,9 +1,34 @@
 @import './../css/variables.scss';
 
+@mixin profileInfo{
+  .profileInfo{
+    display: flex;
+    &-icon{
+      .mat-icon{
+        width: 34px;
+        height: 34px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: $divider-color;
+        border-radius: 50%;
+        color: white;
+      }
+    }
+    &-description{
+      margin-left: 10px;
+      color: white;
+      font-weight: 400;
+      font-size: .7em;
+    }
+  }
+}
+
 $header-height: 70px;
 $nav-bar-width: 272px;
 
 .app-container{
+  position: relative;
   width: 100vw;
   height: 100vh;
   background-color: $main-background;
@@ -17,21 +42,86 @@ $nav-bar-width: 272px;
   height: $header-height;
   background-color: $main-red;
   .header{
+    position: relative;
     width: 100%;
     height: 100%;
+    .rightElem{
+      position: absolute;
+      right: 10px;
+      top: 10px;
+    }
+    .burger-button{
+      transform: scale(1.4);
+    }
+    @include profileInfo;
   }
 }
 
 .main-container{
+  position: relative;
   height: calc(100% - $header-height);
   width: 100%;
   display: flex;
   flex-direction: row;
   .nav-bar{
+    @include profileInfo;
+    .profileInfo{
+      padding-left: 22px;
+      font-size: 1.6em;
+      color: white;
+      &-icon{
+        .mat-icon{
+          background-color: transparent;
+        }
+      }
+    }
+    position: relative;
     width: $nav-bar-width;
     flex-grow: 0;
     flex-shrink: 0;
     background-color: $main-grey;
+    color: white;
+    padding-top: 30px;
+    .title, .control, .sub{
+      padding-left: 66px;
+      h4{
+        position: relative;
+      }
+      mat-icon{
+        position: absolute;
+        left: -30px;
+      }
+    }
+    .title{
+    }
+    .control{
+      margin-top: 14px;
+      p{
+        margin-top: 14px;
+      }
+    }
+    .sub{
+      margin-top: 20px;
+    }
+    p{
+      margin-top: 4px;
+      color: $divider-color;
+    }
+    mat-divider{
+      margin-top: 20px;
+    }
+    p{
+      font-size: .8em;
+      font-weight: 400;
+    }
+    .version{
+      color: $disabled;
+      font-weight: 400;
+      font-size: .7em;
+      position: absolute;
+      bottom: 20px;
+      left: 50px;
+    }
   }
   .main{
     flex-grow: 1;
@@ -42,10 +132,34 @@ $nav-bar-width: 272px;
 }
 
 @media (max-width: 1024px) {
-  .nav-bar{
-    width: 0px !important;
+  .opened-menu{
+    .nav-bar{
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      width: $nav-bar-width !important;
+      height: 100%;
+      z-index: 2;
+    }
+    .main{
+      max-width: 100% !important;
+    }
   }
-  .main{
-    max-width: 100% !important;
+  .closed-menu{
+    .nav-bar{
+      width: 0px !important;
+      display: none;
+    }
+    .main{
+      max-width: 100% !important;
+    }
+  }
+}
+
+@media (max-width: 500px) {
+  .opened-menu{
+    .nav-bar{
+      width: 100% !important;
+    }
   }
 }

@@ -61,6 +61,7 @@ app-account-list{
     .mat-mdc-form-field{
       height: $select-count-height;
       width: 68px;
+      min-width: 58px;
     }
     .mat-mdc-text-field-wrapper{
       height: $select-count-height !important;

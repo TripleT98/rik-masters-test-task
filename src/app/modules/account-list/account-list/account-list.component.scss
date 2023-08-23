@@ -1,5 +1,7 @@
 @import './../../../../css/variables.scss';
 
+$footer-height: 52px;
+
 @mixin flexCenter{
   display: flex;
   justify-content: center;
@@ -38,7 +40,7 @@
 
 .table-footer{
   margin-top: 2px;
-  height: 52px;
+  height: $footer-height;
   width: 100%;
   background-color: white;
   display: flex;
@@ -103,11 +105,21 @@
     width: 10%;
 }
 
+.sortBar{
+  justify-content: center;
+  .mat-mdc-form-field{
+    width: 160px;
+    margin-left: 10px;
+  }
+}
+
 $divider-border: 1px solid $divider-color;
 
 .user-card{
   @include flexCenter;
   flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   align-items: flex-start;
   font-size: .8em;
   background-color: white;
@@ -115,38 +127,28 @@ $divider-border: 1px solid $divider-color;
   &:not(:first-child){
     margin-top: 8px;
   }
-  .col{
-    width: 50%;
+  .user-card-row{
     @include flexCenter;
-    flex-direction: column;
-    &.left{
+    width: 50%;
+    height: 52px;
+    &:not(:last-child){
+      border-bottom: $divider-border;
+    }
+    &:nth-child(odd){
       border-right: $divider-border;
     }
-    &.right{
-      .user-card-row{
-        border-bottom: $divider-border;
+    &-text, &-content{
+      padding-left: 5%;
+      width: 50%;
+    }
+    &-content{
+      span{
+        font-weight: 400;
       }
     }
-    .user-card-row{
-      @include flexCenter;
-      width: 100%;
-      height: 52px;
-      &:not(:last-child){
-        border-bottom: $divider-border;
-      }
-      &-text, &-content{
-        padding-left: 5%;
-        width: 50%;
-      }
-      &-content{
-        span{
-          font-weight: 400;
-        }
-      }
+    .ifCheckbox{
+      transform: translateX(-10px);
     }
-  }
-  .user-card-row{
-
   }
 }
 
@@ -157,10 +159,30 @@ $divider-border: 1px solid $divider-color;
   }
 }
 
+@mixin buttonBar720{
+  .button-bar{
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    flex-wrap: wrap;
+    .action-button{
+      width: 48%;
+      margin: 0;
+      margin-top: 18px;
+      .mat-icon{
+        display: none;
+      }
+    }
+  }
+}
+
 @media (max-width: 1024px) {
   .main-bar{
     display: flex;
     flex-direction: row;
+    .action-button{
+      margin-top: 10px;
+    }
   }
 }
 
@@ -168,5 +190,40 @@ $divider-border: 1px solid $divider-color;
   .main-bar{
     display: flex;
     flex-direction: column;
+  }
+}
+
+@media (max-width: 720px) {
+  @include buttonBar720;
+}
+
+@media (max-width: 620px) {
+  .user-card{
+    display: block;
+    .user-card-row{
+      width: 100%;
+      border: 0px !important;
+      &:not(:last-child){
+        border-bottom: $divider-border !important;
+      }
+      &-text{
+        border-right: $divider-border !important;
+      }
+    }
+  }
+}
+
+@media (max-width: 620px) {
+  .table-footer:not(.sortBar){
+    flex-wrap: wrap;
+    padding: 8px 10px;
+    height: calc($footer-height*3);
+    justify-content: space-around;
+    .footer-block{
+      width: 50%;
+      &.select-count, &.selected-count{
+        width: 100%
+      }
+    }
   }
 }
